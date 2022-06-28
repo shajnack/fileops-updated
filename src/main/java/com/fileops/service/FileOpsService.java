@@ -62,6 +62,24 @@ public class FileOpsService implements FileOpsServiceInterface{
 
     }
 
+
+    public Path uploadFilePath(MultipartFile file) {
+        Path dfile = null;
+        try {
+           String fileName = file.getOriginalFilename();
+             dfile = this.dirLocation.resolve(fileName);
+            Files.copy(file.getInputStream(), dfile,StandardCopyOption.REPLACE_EXISTING);
+            return dfile;
+
+        } catch (Exception e) {
+            System.out.println("err");
+            //throw new FileStorageException("Could not upload file");
+        }
+        return dfile;
+
+
+    }
+
     @Override
     public Resource downloadFile(String fileName) {
         Resource resource=null;

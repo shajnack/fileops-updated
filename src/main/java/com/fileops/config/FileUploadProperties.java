@@ -7,6 +7,7 @@ public class FileUploadProperties {
 
     private String location;
 
+
     public String getLocation() {
         return location;
     }
