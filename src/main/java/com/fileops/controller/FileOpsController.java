@@ -1,7 +1,9 @@
 package com.fileops.controller;
 
 import ch.qos.logback.core.net.SyslogOutputStream;
+import com.dropbox.core.DbxException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fileops.service.DropboxServiceImpl;
 import com.fileops.service.FileOpsService;
 import com.fileops.utils.FileResponse;
 import org.apache.commons.codec.binary.Base64;
@@ -37,6 +39,9 @@ public class FileOpsController {
 
     @Autowired
     FileOpsService fileOpsService;
+
+    @Autowired
+    private DropboxServiceImpl dropboxService;
 
     @PostMapping("/uploadFileToLocalDisk")
     public  ResponseEntity uploadFiletoLocal (@RequestParam("file") MultipartFile file) {
@@ -181,46 +186,24 @@ public class FileOpsController {
 
     }
 
-    @GetMapping("/downloadFileContentFromGitToFile")
-    public ResponseEntity downloadFileContentFromGitToFile() throws IOException {
+    @GetMapping("/downloadFileFromDropbox/")
+    public ResponseEntity downloadFileFromDropbox(@RequestParam String filepath) throws DbxException, IOException {
 
-        String json = "";
+        //String filepath="/test/"+fileName;
+        Path inputPath = Paths.get(filepath);
+        String filename= String.valueOf(inputPath.getFileName());
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Accept",  "application/vnd.github.v3+json");
+        InputStream inputStream = dropboxService.downloadFile(filepath.toString());
 
-        headers.set("Authorization", "token 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");
+        File targetFile = new File("/Users/aftabkarim/Desktop/shajna/FileOpsTest/"+filename);
+        org.apache.commons.io.FileUtils.copyInputStreamToFile(inputStream, targetFile);
 
-        HttpEntity<String> request = new HttpEntity<String>(json, headers);
-        RestTemplate template = new RestTemplate();
-        //https://api.github.com/repos/OWNER/REPO/contents/PATH
-        ResponseEntity<JsonNode> repos = template.exchange("https://api.github.com/repos/shajnack/testops/contents/hello1.txt",
-                HttpMethod.GET, request, JsonNode.class);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + filepath+ "\"")
+                .body("downloaded from dropbox");
 
-        /**below snippet works.Commented as the same data is availble via string in above API*/
-        ByteArrayResource resource = new ByteArrayResource(repos.getBody().get("content").toString().getBytes());
-        HttpHeaders headerss = new HttpHeaders();
-       headerss.add("Cache-Control", "no-cache, no-store, must-revalidate");
-        headerss.add("Pragma", "no-cache");
-        headerss.add("Expires", "0");
-           return ResponseEntity.ok()
-                  .headers(headerss)
-                   .contentLength(repos.getBody().get("content").toString().length())
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                   .body(resource);
 
-        /**section end*/
-
-       /**byte[] decodedBytes = Base64.getDecoder().decode(repos.getBody().get("content").toString());
-       String decodedString = new String(decodedBytes);
-
-        File file = new File("/Users/aftabkarim/Desktop/shajna/FileOpsSRC/fileoptest/new1.txt");
-        FileWriter wr = new FileWriter(decodedString);
-
-        wr.write("hello");
-        wr.flush();
-       wr.close();
-        return file;*/
     }
 
 
@@ -335,4 +318,46 @@ public class FileOpsController {
 
 
     }
+    @GetMapping("/downloadFileContentFromGitToFile")
+    public ResponseEntity downloadFileContentFromGitToFile() throws IOException {
+
+        String json = "";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept",  "application/vnd.github.v3+json");
+
+        headers.set("Authorization", "token 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");
+
+        HttpEntity<String> request = new HttpEntity<String>(json, headers);
+        RestTemplate template = new RestTemplate();
+        //https://api.github.com/repos/OWNER/REPO/contents/PATH
+        ResponseEntity<JsonNode> repos = template.exchange("https://api.github.com/repos/shajnack/testops/contents/hello1.txt",
+                HttpMethod.GET, request, JsonNode.class);
+
+        /**below snippet works.Commented as the same data is availble via string in above API*/
+        ByteArrayResource resource = new ByteArrayResource(repos.getBody().get("content").toString().getBytes());
+        HttpHeaders headerss = new HttpHeaders();
+        headerss.add("Cache-Control", "no-cache, no-store, must-revalidate");
+        headerss.add("Pragma", "no-cache");
+        headerss.add("Expires", "0");
+        return ResponseEntity.ok()
+                .headers(headerss)
+                .contentLength(repos.getBody().get("content").toString().length())
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
+
+        /**section end*/
+
+        /**byte[] decodedBytes = Base64.getDecoder().decode(repos.getBody().get("content").toString());
+         String decodedString = new String(decodedBytes);
+
+         File file = new File("/Users/aftabkarim/Desktop/shajna/FileOpsSRC/fileoptest/new1.txt");
+         FileWriter wr = new FileWriter(decodedString);
+
+         wr.write("hello");
+         wr.flush();
+         wr.close();
+         return file;*/
+    }
+
 }
