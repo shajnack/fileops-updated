@@ -5,18 +5,13 @@ import com.dropbox.core.v2.DbxClientV2;
 import lombok.Data;
 import lombok.Value;
 import org.springframework.context.annotation.Bean;
-
-
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-//@ConfigurationProperties(prefix = "dropbox.accessToken")
 @Data
 @Configuration
 public class DropboxConfiguration {
-
-
-    private String accessToken="sl.BKfQcMOk-bBEjNaLNc9K0aKylcY0qDKTYb3u2ed3Kh82SwwwfpAtQchFMnELsQHYVomCRX-HhvgoAQkwTXzJDChfz2uAlbLeh2aIFltucgrICtnpRt9tNZcswFWvIjGTrT0QoAs";
+    /**Need to change it to request param*/
+    private String accessToken="sl.BKfQLDPXphiESLFl59WPj8czDLGpUxFG8rYlwkdQpDYkmN72jCHicP7PpfhuGD0K0KM-_0-LGABhak-RuMMiYhmrZ6YpQLVK5iwGwTOxO8KWvfKHoB0dwda0Xl2hodwEvJ6sKsk";
 
     @Bean
     public DbxClientV2 dropboxClient() {

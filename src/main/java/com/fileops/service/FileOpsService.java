@@ -42,31 +42,11 @@ public class FileOpsService implements FileOpsServiceInterface{
         }
     }
 
-
-
     @Override
-    public String uploadFile(MultipartFile file) {
-        String fileName = null;
-        try {
-             fileName = file.getOriginalFilename();
-            Path dfile = this.dirLocation.resolve(fileName);
-            Files.copy(file.getInputStream(), dfile,StandardCopyOption.REPLACE_EXISTING);
-            return fileName;
-
-        } catch (Exception e) {
-            System.out.println("err");
-            //throw new FileStorageException("Could not upload file");
-        }
-   return fileName;
-
-
-    }
-
-
     public Path uploadFilePath(MultipartFile file) {
         Path dfile = null;
         try {
-           String fileName = file.getOriginalFilename();
+             String fileName = file.getOriginalFilename();
              dfile = this.dirLocation.resolve(fileName);
             Files.copy(file.getInputStream(), dfile,StandardCopyOption.REPLACE_EXISTING);
             return dfile;
@@ -76,11 +56,13 @@ public class FileOpsService implements FileOpsServiceInterface{
             //throw new FileStorageException("Could not upload file");
         }
         return dfile;
-
-
     }
 
-    @Override
+
+
+
+
+   /** @Override
     public Resource downloadFile(String fileName) {
         Resource resource=null;
         try {
@@ -102,5 +84,5 @@ public class FileOpsService implements FileOpsServiceInterface{
         return resource;
 
 
-}
+}*/
 }

@@ -4,10 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "file.upload")
 public class FileUploadProperties {
-
-    private String location;
-
-
+    private String location;/**use lombok*/
     public String getLocation() {
         return location;
     }

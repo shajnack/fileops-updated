@@ -21,26 +21,4 @@ public class DropboxServiceImpl implements DropboxService {
         return  client.files().download(filePath).getInputStream();
     }
 
-  //  @Override
-  //  public FileMetadata uploadFile(String filePath, InputStream fileStream) throws DropboxException {
-   //     return handleDropboxAction(() -> client.files().uploadBuilder(filePath).uploadAndFinish(fileStream),
-    //            String.format("Error uploading file: %s", filePath));
-   // }
-
-
-
-   /* private <T> T getMetadata(String path, Class<T> type, String message) {
-        Metadata metadata = handleDropboxAction(() -> client.files().getMetadata(path),
-                String.format("Error accessing details of: %s", path));
-
-        checkIfMetadataIsInstanceOfGivenType(metadata, type, message);
-        return (T) metadata;
-    }
-
-    private <T> void checkIfMetadataIsInstanceOfGivenType(Metadata metadata, Class<T> validType, String exceptionMessage) {
-        boolean isValidType = validType.isInstance(metadata);
-        if (!isValidType) {
-            throw new DropboxException(exceptionMessage);
-        }
-    }*/
 }
