@@ -1,6 +1,5 @@
 package com.fileops.controller;
 
-import ch.qos.logback.core.net.SyslogOutputStream;
 import com.dropbox.core.DbxException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fileops.service.DropboxServiceImpl;
@@ -8,13 +7,10 @@ import com.fileops.service.FileOpsService;
 import com.fileops.utils.FileResponse;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
-import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -22,26 +18,20 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-
 
 @RestController
 @RequestMapping("/api")
-public class FileOpsController {
+public class FileOpsRestController {
 
     @Autowired
     FileOpsService fileOpsService;
 
     @Autowired
-    private DropboxServiceImpl dropboxService;
+    private DropboxServiceImpl dropboxServiceImpl;
 
     @PostMapping("/uploadFileToLocalDisk")
     public  ResponseEntity uploadFiletoLocal (@RequestParam("file") MultipartFile file) {
@@ -76,7 +66,7 @@ public class FileOpsController {
                 + true + "\", \"auto_init\": " + true + "}";
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept",  "application/vnd.github.v3+json");
-        headers.set("Authorization", "token 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");
+        headers.set("Authorization", "token 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");
 
         HttpEntity<String> request = new HttpEntity<String>(json, headers);
         RestTemplate template = new RestTemplate();
@@ -122,7 +112,7 @@ public class FileOpsController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept",  "application/vnd.github.v3+json");
-        headers.set("Authorization", "token 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");
+        headers.set("Authorization", "token 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");
 
         HttpEntity<String> request = new HttpEntity<String>(json, headers);
         RestTemplate template = new RestTemplate();
@@ -150,7 +140,7 @@ public class FileOpsController {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept",  "application/vnd.github.v3+json");
         //headers.set("Accept",  "application/vnd.github.VERSION.raw");
-        headers.set("Authorization", "token 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");
+        headers.set("Authorization", "token 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");
 
         HttpEntity<String> request = new HttpEntity<String>(json, headers);
         RestTemplate template = new RestTemplate();
@@ -181,6 +171,7 @@ public class FileOpsController {
         return ResponseEntity.ok()
                .header(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=\"" + filename+ "\"")
+                .header("downloadcheck","1")
              .body(decodedByte);
 
 
@@ -189,11 +180,12 @@ public class FileOpsController {
     @GetMapping("/downloadFileFromDropbox/")
     public ResponseEntity downloadFileFromDropbox(@RequestParam String filepath) throws DbxException, IOException {
 
+        System.out.println("*****"+filepath);
         //String filepath="/test/"+fileName;
         Path inputPath = Paths.get(filepath);
         String filename= String.valueOf(inputPath.getFileName());
 
-        InputStream inputStream = dropboxService.downloadFile(filepath.toString());
+        InputStream inputStream = dropboxServiceImpl.downloadFile(filepath.toString());
 
         File targetFile = new File("/Users/aftabkarim/Desktop/shajna/FileOpsTest/"+filename);
         org.apache.commons.io.FileUtils.copyInputStreamToFile(inputStream, targetFile);

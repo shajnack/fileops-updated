@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
 public class DropboxConfiguration {
 
 
-    private String accessToken="sl.BKYYk52fBoASFWnp5Mju0LpvsSlOoKUMag6DmlZxeDaqPlnK1NF80c8TTc1mH_AoVmlN0NvvFooK55IiVpk9BrHqHPk0fUXfEPQ87qR6yqErid1feNPu5mu_CAaXjX6kcHBEZGiix2oc";
+    private String accessToken="sl.BKfQcMOk-bBEjNaLNc9K0aKylcY0qDKTYb3u2ed3Kh82SwwwfpAtQchFMnELsQHYVomCRX-HhvgoAQkwTXzJDChfz2uAlbLeh2aIFltucgrICtnpRt9tNZcswFWvIjGTrT0QoAs";
 
     @Bean
     public DbxClientV2 dropboxClient() {
