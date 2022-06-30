@@ -1,15 +1,24 @@
 package com.fileops.config;
 
+import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "file.upload")
+@ConfigurationProperties(prefix = "file.ops")
 public class FileUploadProperties {
-    private String location;/**use lombok*/
-    public String getLocation() {
-        return location;
+    private String uploadTempLocation;
+    private String downloadLocation;
+    public String getUploadTempLocation() {
+        return uploadTempLocation;
     }
-    public void setLocation(String location) {
-        this.location = location;
+    public void setUploadTempLocation(String uploadTempLocation) {
+        this.uploadTempLocation = uploadTempLocation;
+    }
+
+    public String getDownloadLocation() {
+        return downloadLocation;
+    }
+    public void setDownloadLocation(String downloadLocation) {
+        this.downloadLocation = downloadLocation;
     }
 }
 

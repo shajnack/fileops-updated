@@ -8,5 +8,12 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class FileProcessingException extends RuntimeException {
-    private String message;
+
+    public FileProcessingException(String message) {
+        super(message);
+    }
+
+    public FileProcessingException(String message, Exception cause) {
+        super(message, cause);
+    }
 }

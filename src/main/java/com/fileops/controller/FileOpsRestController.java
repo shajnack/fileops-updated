@@ -3,14 +3,12 @@ package com.fileops.controller;
 import com.dropbox.core.DbxException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fileops.service.DropboxServiceImpl;
-import com.fileops.service.FileOpsService;
+import com.fileops.service.FileOpsServiceImpl;
 import com.fileops.utils.FileResponse;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -22,27 +20,24 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-
 @RestController
 @RequestMapping("/api")
 public class FileOpsRestController {
 
     @Autowired
-    FileOpsService fileOpsService;
+    FileOpsServiceImpl fileOpsService;
     @Autowired
     private DropboxServiceImpl dropboxServiceImpl;
 
-    private final String gitAuthToken="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";
-
     @PostMapping("/createGitRepo/{repoName}")
-    public ResponseEntity createGitRepo(@PathVariable String repoName) {
+    public ResponseEntity createGitRepo(@PathVariable String repoName,@RequestParam(required = true) String gitAuthToken) {
 
         String json = "{\"name\": \"" + repoName + "\", \"public\": \""
                 + true + "\", \"auto_init\": " + true + "}";
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept",  "application/vnd.github.v3+json");
-        headers.set("Authorization", "token "+gitAuthToken); /**Need to make it to runtime param*/
+        headers.set("Authorization", "token "+gitAuthToken);
 
         HttpEntity<String> request = new HttpEntity<String>(json, headers);
 
@@ -50,18 +45,16 @@ public class FileOpsRestController {
         template.exchange("https://api.github.com/user/repos", HttpMethod.POST, request, Object.class);
 
         return ResponseEntity.ok()
-                .body(repoName+" repo created successfully");
+                .body(repoName+" Repo created successfully");
 
     }
 
     @PostMapping("/uploadFileToGit")
     public ResponseEntity uploadFileToGit(@RequestParam("file") MultipartFile file,@RequestParam(required = true) String gitAuthToken) throws IOException {
 
-        //file.getBytes();
         String origFileName=file.getOriginalFilename();
         Path path = fileOpsService.uploadFilePath(file);
 
-       // byte[] fileContent = Files.readAllBytes(path);
         byte[] fileContent = file.getBytes();
         String encodedString = java.util.Base64.getEncoder().encodeToString(fileContent);
 
@@ -69,7 +62,7 @@ public class FileOpsRestController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept",  "application/vnd.github.v3+json");
-        headers.set("Authorization", "token "+gitAuthToken); /**Need to make it to runtime param*/
+        headers.set("Authorization", "token "+gitAuthToken);
 
         HttpEntity<String> request = new HttpEntity<String>(json, headers);
 
@@ -86,12 +79,12 @@ public class FileOpsRestController {
     }
 
     @GetMapping("/downloadFileFromGit/{filename:.+}")
-    public ResponseEntity downloadFileFromGit(@PathVariable String filename) throws IOException{
+    public ResponseEntity downloadFileFromGit(@PathVariable String filename,@RequestParam(required = true) String gitAuthToken) throws IOException{
 
         String json="";
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept",  "application/vnd.github.v3+json");
-        headers.set("Authorization", "token "+gitAuthToken);/**Need to make it to runtime param*/
+        headers.set("Authorization", "token "+gitAuthToken);
 
         HttpEntity<String> request = new HttpEntity<String>(json, headers);
         RestTemplate template = new RestTemplate();
@@ -106,17 +99,18 @@ public class FileOpsRestController {
         Base64 decoder = new Base64(true);
         byte[] decodedByte= decoder.decode(originalValue);
 
-        Path destinationFile = Paths.get("/Users/shajnack/FileOpsTest/", filename);/**need to make the download path configurable*/
+        Path destinationFile = Paths.get(fileOpsService.getDownloadDirLocation().toString(), filename);
         Files.write(destinationFile, decodedByte);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=\"" + filename+ "\"")
                 .header("downloadcheck","1")  /**can set the output path here as well*/
-                .body("File downloaded from dropbox to the path /Users/shajnack/FileOpsTest/ "+decodedByte);
+                .body("File downloaded from git to the path "+ fileOpsService.getDownloadDirLocation().toString()+decodedByte);
     }
 
     /**filepath from dropbox eg: /F1/new.txt*/
+
     @GetMapping("/downloadFileFromDropbox/")
     public ResponseEntity downloadFileFromDropbox(@RequestParam String filepath) throws DbxException, IOException {
 
@@ -126,7 +120,7 @@ public class FileOpsRestController {
 
         InputStream inputStream = dropboxServiceImpl.downloadFile(filepath.toString());
 
-        File targetFile = new File("/Users/shajnack/FileOpsTest/"+filename); /**need to make the  path configurable*/
+        File targetFile = new File(fileOpsService.getDownloadDirLocation().toString()+"/"+filename);
         org.apache.commons.io.FileUtils.copyInputStreamToFile(inputStream, targetFile);
 
         return ResponseEntity.ok()

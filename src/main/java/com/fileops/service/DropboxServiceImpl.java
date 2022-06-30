@@ -18,7 +18,7 @@ public class DropboxServiceImpl implements DropboxService {
 
     @Override
     public InputStream downloadFile(String filePath) throws DropboxException, DbxException {
-        return  client.files().download(filePath).getInputStream();
+        return client.files().download(filePath).getInputStream();
     }
 
 }

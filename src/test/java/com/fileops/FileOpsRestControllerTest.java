@@ -2,7 +2,7 @@ package com.fileops;
 
 import com.fileops.controller.FileOpsRestController;
 import com.fileops.service.DropboxServiceImpl;
-import com.fileops.service.FileOpsService;
+import com.fileops.service.FileOpsServiceImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -33,7 +33,7 @@ public class FileOpsRestControllerTest {
 
     private MockMvc mockMvc;
     @Mock
-    private FileOpsService fileOpsService;
+    private FileOpsServiceImpl fileOpsServiceimpl;
     @Mock
     private DropboxServiceImpl dropboxServiceImpl;
     @InjectMocks
@@ -44,24 +44,26 @@ public class FileOpsRestControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(fileOpsRestController)
                 .build();
     }
-    //POST
-    @Test
-    public void createGitTest() throws Exception {
-
-        mockMvc.perform(post("/api/createGitRepo/mockrepoNew9"))
-                .andExpect(status().isOk());
-        //.andExpect(MockMvcResultMatchers.jsonPath("$").exists());
-    }
-
     //@TempDir
     //static Path tempDir;
     @Rule
     public TemporaryFolder testFolder = new TemporaryFolder();
+    //POST
+    @Test
+    public void createGitTest() throws Exception {
+
+        mockMvc.perform(post("/api/createGitRepo/mockrepoNew12")
+                .param("gitAuthToken","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"))
+                .andExpect(status().isOk());
+        //.andExpect(MockMvcResultMatchers.jsonPath("$").exists());
+    }
+
+
 
     @Test
     public void uploadFileToGitTest() throws Exception {
 
-        File tempFile = testFolder.newFile("file.txt");
+        File tempFile = testFolder.newFile("file1.txt");
         File tempFolder = testFolder.newFolder("folder");
         System.out.println("Test folder: " + testFolder.getRoot());
 
@@ -78,15 +80,15 @@ public class FileOpsRestControllerTest {
         /** Path dfile = Paths.get("/Users/shajnack/FileOpsTest/new11.txt");
          Mockito.when(fileOpsService.uploadFilePath(Mockito.any())).thenReturn(tempFile.toPath());*/
 
-        Mockito.when(fileOpsService.uploadFilePath(Mockito.any())).thenReturn(tempFile.toPath());
+        Mockito.when(fileOpsServiceimpl.uploadFilePath(Mockito.any())).thenReturn(tempFile.toPath());
 
         ResultMatcher ok = MockMvcResultMatchers.status().isOk();
 
-        MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "file.txt", MediaType.TEXT_PLAIN_VALUE, "Heloo".getBytes());
+        MockMultipartFile mockMultipartFile = new MockMultipartFile("file", tempFile.getName(), MediaType.TEXT_PLAIN_VALUE, "Heloo".getBytes());
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.multipart("/api/uploadFileToGit/")
                         //.file(mockMultipartFile)
                         .file(mockMultipartFile)
-                        .param("gitAuthToken", "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")
+                        .param("gitAuthToken", "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")
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(MockMvcResultMatchers.status().is(200)).andReturn();
         Assert.assertEquals(200, result.getResponse().getStatus());
@@ -96,12 +98,24 @@ public class FileOpsRestControllerTest {
 
     @Test
     public void downloadFileFromGitTest() throws Exception {
-        mockMvc.perform(get("/api/downloadFileFromGit/README.md"))
+
+        File tempFile = testFolder.newFile("file.txt");
+        File tempFolder = testFolder.newFolder("folder");
+        System.out.println("Test folder: " + testFolder.getRoot());
+        Mockito.when(fileOpsServiceimpl.getDownloadDirLocation()).thenReturn(tempFolder.toPath());
+
+        mockMvc.perform(get("/api/downloadFileFromGit/file.txt")
+                .param("gitAuthToken","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"))
                 .andExpect(status().isOk());
     }
 
     @Test
     public void downloadFileFromDropboxTest() throws Exception {
+
+        File tempFile = testFolder.newFile("new.txt");
+        File tempFolder = testFolder.newFolder("folder");
+        System.out.println("Test folder: " + testFolder.getRoot());
+        Mockito.when(fileOpsServiceimpl.getDownloadDirLocation()).thenReturn(tempFolder.toPath());
 
         InputStream anyInputStream = new ByteArrayInputStream("Test data from dropbox".getBytes());
         Mockito.when(dropboxServiceImpl.downloadFile(Mockito.anyString())).thenReturn(anyInputStream);
@@ -110,8 +124,8 @@ public class FileOpsRestControllerTest {
          InputStream mockInputstream = new FileInputStream("/Users/shajnack/FileOpsTest/hi5.txt");
          Mockito.when(dropboxServiceImpl.downloadFile(Mockito.anyString())).thenReturn(mockInputstream);*/
 
-        mockMvc.perform(get("/api/downloadFileFromDropbox/")
-                .param("filepath", "/F5/new.txt"))
+        mockMvc.perform(get("/api/downloadFileFromDropbox/")/**testing api calls*/
+                .param("filepath", tempFolder.toString()))
                 .andExpect(status().isOk());
 
     }
@@ -126,7 +140,7 @@ public class FileOpsRestControllerTest {
         File tempFile = testFolder.newFile("file1.txt");
         File tempFolder = testFolder.newFolder("folder");
         System.out.println("Test folder: " + testFolder.getRoot());
-        Mockito.when(fileOpsService.uploadFilePath(Mockito.any())).thenReturn(tempFile.toPath());
+        Mockito.when(fileOpsServiceimpl.uploadFilePath(Mockito.any())).thenReturn(tempFile.toPath());
 
         ResultMatcher ok = MockMvcResultMatchers.status().isOk();
         MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "file1.txt", MediaType.TEXT_PLAIN_VALUE, "Hello, World!".getBytes());
