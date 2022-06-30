@@ -32,6 +32,7 @@ public class FileOpsRestController {
     @Autowired
     private DropboxServiceImpl dropboxServiceImpl;
 
+    private final String gitAuthToken="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";
 
     @PostMapping("/createGitRepo/{repoName}")
     public ResponseEntity createGitRepo(@PathVariable String repoName) {
@@ -41,7 +42,7 @@ public class FileOpsRestController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept",  "application/vnd.github.v3+json");
-        headers.set("Authorization", "token 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");/**Need to make it to runtime param*/
+        headers.set("Authorization", "token "+gitAuthToken); /**Need to make it to runtime param*/
 
         HttpEntity<String> request = new HttpEntity<String>(json, headers);
 
@@ -53,7 +54,7 @@ public class FileOpsRestController {
 
     }
 
-    @PutMapping("/uploadFileToGit")
+    @PostMapping("/uploadFileToGit")
     public ResponseEntity uploadFileToGit(@RequestParam("file") MultipartFile file) throws IOException {
 
         String origFileName=file.getOriginalFilename();
@@ -66,7 +67,7 @@ public class FileOpsRestController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept",  "application/vnd.github.v3+json");
-        headers.set("Authorization", "token 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"); /**Need to make it to runtime param*/
+        headers.set("Authorization", "token "+gitAuthToken); /**Need to make it to runtime param*/
 
         HttpEntity<String> request = new HttpEntity<String>(json, headers);
 
@@ -79,6 +80,7 @@ public class FileOpsRestController {
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=\"" + origFileName+ "\"")
                 .body(origFileName+"file uploaded to git successfully to Repo /shajnack/testops/contents/");
+
     }
 
     @GetMapping("/downloadFileFromGit/{filename:.+}")
@@ -87,7 +89,7 @@ public class FileOpsRestController {
         String json="";
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept",  "application/vnd.github.v3+json");
-        headers.set("Authorization", "token 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");/**Need to make it to runtime param*/
+        headers.set("Authorization", "token "+gitAuthToken);/**Need to make it to runtime param*/
 
         HttpEntity<String> request = new HttpEntity<String>(json, headers);
         RestTemplate template = new RestTemplate();

@@ -29,6 +29,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -58,20 +60,25 @@ public class TestFileOpsRestController {
     @Test
     public void createGitTest() throws Exception {
 
-        mockMvc.perform(post("/api/createGitRepo/mockrepoNew1"))
+        mockMvc.perform(post("/api/createGitRepo/mockrepoNew9"))
                 .andExpect(status().isOk());
         //.andExpect(MockMvcResultMatchers.jsonPath("$").exists());
     }
     @Test
     public void uploadFileToGit() throws Exception {
+
+        Path dfile = Paths.get("/Users/shajnack/FileOpsTest/new9.txt");
+        Mockito.when(fileOpsService.uploadFilePath(Mockito.any())).thenReturn(dfile);
+
         ResultMatcher ok = MockMvcResultMatchers.status().isOk();
 
-        MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "helloo.txt", MediaType.TEXT_PLAIN_VALUE, "Hello, World!".getBytes());
+        MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "new9.txt", MediaType.TEXT_PLAIN_VALUE, "Hello, World!".getBytes());
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.multipart("/api/uploadFileToGit/")
                         .file(mockMultipartFile)
                         .contentType(MediaType.MULTIPART_FORM_DATA))
-                        .andExpect(MockMvcResultMatchers.status().is(200)).andReturn();
+                .andExpect(MockMvcResultMatchers.status().is(200)).andReturn();
         Assert.assertEquals(200, result.getResponse().getStatus());
+
     }
 
 
@@ -84,7 +91,7 @@ public class TestFileOpsRestController {
     @Test
     public void downloadFileFromDropbox() throws Exception {
 
-        InputStream mockInputstream = new FileInputStream("/Users/shajnack/FileOpsTest/hi.txt");
+        InputStream mockInputstream = new FileInputStream("/Users/shajnack/FileOpsTest/hi5.txt");
         Mockito.when(dropboxServiceImpl.downloadFile(Mockito.anyString())).thenReturn(mockInputstream);
 
         mockMvc.perform(get("/api/downloadFileFromDropbox/")
@@ -95,6 +102,10 @@ public class TestFileOpsRestController {
 
     @Test
     public void uploadFileToLocalDiskTest() throws Exception {
+
+        Path dfile = Paths.get("/Users/shajnack/FileOpsTest/");
+        Mockito.when(fileOpsService.uploadFilePath(Mockito.any())).thenReturn(dfile);
+
         ResultMatcher ok = MockMvcResultMatchers.status().isOk();
         MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "hello.txt", MediaType.TEXT_PLAIN_VALUE, "Hello, World!".getBytes());
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.multipart("/api/uploadFileToLocalDisk/")
