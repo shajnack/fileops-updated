@@ -55,12 +55,14 @@ public class FileOpsRestController {
     }
 
     @PostMapping("/uploadFileToGit")
-    public ResponseEntity uploadFileToGit(@RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity uploadFileToGit(@RequestParam("file") MultipartFile file,@RequestParam(required = true) String gitAuthToken) throws IOException {
 
+        //file.getBytes();
         String origFileName=file.getOriginalFilename();
         Path path = fileOpsService.uploadFilePath(file);
 
-        byte[] fileContent = Files.readAllBytes(path);
+       // byte[] fileContent = Files.readAllBytes(path);
+        byte[] fileContent = file.getBytes();
         String encodedString = java.util.Base64.getEncoder().encodeToString(fileContent);
 
         String json = "{\"message\": \"my commit message\", \"content\": \""+encodedString+"\"}"; /**Need to make it to runtime param*/
