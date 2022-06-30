@@ -53,7 +53,7 @@ public class FileOpsRestControllerTest {
     public void createGitTest() throws Exception {
 
         mockMvc.perform(post("/api/createGitRepo/mockrepoNew12")
-                .param("gitAuthToken","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"))
+                .param("gitAuthToken",""))
                 .andExpect(status().isOk());
         //.andExpect(MockMvcResultMatchers.jsonPath("$").exists());
     }
@@ -88,7 +88,7 @@ public class FileOpsRestControllerTest {
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.multipart("/api/uploadFileToGit/")
                         //.file(mockMultipartFile)
                         .file(mockMultipartFile)
-                        .param("gitAuthToken", "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")
+                        .param("gitAuthToken", "")
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(MockMvcResultMatchers.status().is(200)).andReturn();
         Assert.assertEquals(200, result.getResponse().getStatus());
@@ -105,7 +105,7 @@ public class FileOpsRestControllerTest {
         Mockito.when(fileOpsServiceimpl.getDownloadDirLocation()).thenReturn(tempFolder.toPath());
 
         mockMvc.perform(get("/api/downloadFileFromGit/file.txt")
-                .param("gitAuthToken","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"))
+                .param("gitAuthToken",""))
                 .andExpect(status().isOk());
     }
 
